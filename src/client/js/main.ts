@@ -13,12 +13,18 @@ const id = socket.id;
 
 socket.on(Event.CONNECT, () => {
     console.log('connected');
+    drawing = [];
 });
 
 socket.on(Event.UPDATE, (gameState: GameState) => {
     reset(canvas, context)
     draw(gameState.drawing, context);
-})
+});
+
+socket.on(Event.DRAWING, () => {
+    drawing = [];
+    alert('you have to draw!')
+});
 
 function drawLine(x1: number, y1: number, x2: number, y2: number, context: CanvasRenderingContext2D) {
     context.beginPath();

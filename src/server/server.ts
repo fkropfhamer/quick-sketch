@@ -3,11 +3,12 @@ import * as express from 'express';
 import * as http from 'http';
 import Config from "../global/config";
 import Event from "../global/event";
-import { User, createUser, createPlayer, Player, Client } from './user';
+import User from './user';
 import GameState, { Drawing } from '../global/gamestate';
+import Game from './game';
 
 export default class Server {
-    games: GameState[];
+    games: Game[];
     users: User[];
 
     constructor() {
@@ -26,100 +27,37 @@ export default class Server {
 
         webSocket.on(Event.CONNECTION, (socket: io.Socket) => {
             const id = socket.id;
-            const user = createUser(id, socket);
-            const player = createPlayer(id);
+            const user = new User(id, socket);
+            const game = this.findGame(user);
             console.log(`user with id ${id} connected`);
 
-            this.users = Server.addUser(this.users, user);
-            this.games = Server.addPlayer(this.games, player);
+            this.users.push(user);
 
             socket.on(Event.DISCONNECT, () => {
-                this.users = Server.userDisconnected(this.users, id);
-                this.games = Server.playerDisconnected(this.games, id);
                 console.log(`user with id ${id} disconnected`);
+                game.removeUser(user);
+                this.games = this.games.filter(game => game.players.length > 0)
             });
 
             socket.on(Event.SET_USERNAME, (username: string) => {
-                this.games = Server.setUsername(this.games, id, username);
-            })
-
-            socket.on(Event.DRAW, (drawing: Drawing) => {
-                this.games = Server.updateDrawing(this.games, id, drawing);
+                user.username = username;
             });
 
-            
-        setInterval(() => {
-                this.games = Server.updateGames(this.games);
-                this.games = Server.removeEmptyGames(this.games);
-                Server.notifyPlayers(this.games, this.users);
-            }, 20);
+            socket.on(Event.DRAW, (drawing: Drawing) => {
+                game.draw(id, drawing);
+            });
         });
     }
 
-    static userDisconnected(users: User[], id:string): User[] {
-        return users.filter(user => user.id !== id)
-    }
-
-    static updateDrawing(games: GameState[], id: string, drawing: Drawing) {
-        const game = this.getGameOfClient(games, id);
-        const newGame = GameState.updateDrawing(game, id, drawing);
-        const otherGames = games.filter((g) => game !== g)
-        return [...otherGames, newGame];
-    }
-
-    static playerDisconnected(games: GameState[], id: string): GameState[] {
-        const game = this.getGameOfClient(games, id);
-        const newGame = GameState.playerDisconnected(game, id);
-        const otherGames = games.filter((g) => game !== g)
-        return [...otherGames, newGame];
-    }
-
-    static notifyPlayers(games: GameState[], users: User[]): void {
-        games.forEach((game) => {
-            game.players.forEach((player) => {
-                this.notifyUpdate(game, player.id, users)
-            })
-        })
-    } 
-
-    static removeEmptyGames(games: GameState[]): GameState[] {
-        return games.filter(game => game.players.length > 0);
-    }
-
-    static notifyUpdate(gameState: GameState, id: string, users: User[]): void {
-        const user = users.filter((user) => user.id === id)[0];
-        if (user) {
-            user.socket.emit(Event.UPDATE, gameState);
+    findGame(user: User): Game {
+        const openGames = this.games.filter(game => game.players.length < Config.MAX_PLAYER_NUMBER)
+        if (openGames.length <= 0) {
+            const newGame = new Game(user);
+            this.games.push(newGame);
+            return newGame;
         }
-    }
-
-    static updateGames(games: GameState[]): GameState[] {
-        return games;
-    }
-
-    static setUsername(games: GameState[], id: string, username: string): GameState[] {
-        return games;
-    }
-
-    static getGameOfClient(games: GameState[], id: string): GameState {
-        return games.filter(game => GameState.hasPlayer(game, id))[0];
-    } 
-
-    static addUser(users: User[], user: User): User[] {
-        return [...users, user];
-    }
-
-    static addPlayer(games: GameState[], player: Player): GameState[] {
-        const openGames = games.filter((game) => game.players.length < 10);
-        if (openGames.length > 0) {
-            const game = openGames.sort((a, b) => a.players.length - b.players.length)[0];
-            const newGame = GameState.addPlayer(game, player);
-            const otherGames = games.filter(g => game !== g);
-            return [...otherGames, newGame];
-        }
-        
-        const newGame = new GameState(player);
-        return [...games, newGame];
+        const game = openGames.sort((a, b) => a.players.length - b.players.length)[0];
+        game.players.push(user);
+        return game;
     }
 }
-

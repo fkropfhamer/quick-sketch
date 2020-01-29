@@ -1,4 +1,4 @@
-import { Player } from "../server/user";
+import User from "../server/user";
 
 export default class GameState {
     players: Player[];
@@ -6,48 +6,29 @@ export default class GameState {
     drawing: Drawing;
     wordToDraw: string;
     count: number;
+    isDrawing: boolean;
 
-    constructor(player: Player) {
-        this.players = [player];
-        this.drawingPlayer = player;
-        this.drawing = [];
-        this.wordToDraw = "test";
-        this.count = 0;
-    }
-
-    static updateGameState(gameState: GameState): GameState {
-        return gameState;
-    }
-    
-    static hasPlayer(gameState: GameState, id: string): boolean {
-        return gameState.players.filter((player) => player.id === id).length > 0
-    }
-
-    static playerDisconnected(gameState: GameState, id: string): GameState {
-        const newPlayers = gameState.players.filter(player => player.id !== id);
-
-        return { ...gameState, players: newPlayers };
-    }
-
-    static addPlayer(gameState: GameState, player: Player): GameState {
-        const newPlayers = [...gameState.players, player];
-
-        return { ...gameState, players: newPlayers };
-    }
-
-    static updateDrawing(gameState: GameState, id: string, drawing: Drawing): GameState {
-        if (gameState.drawingPlayer.id === id) {
-            return { ...gameState, drawing};
-        }
+    constructor(players: Player[], drawing: Drawing, wordToDraw: string, count: number, drawingPlayer: Player, isDrawing: boolean) {
+        this.players = players;
+        this.drawing = drawing;
+        this.wordToDraw = wordToDraw;
+        this.drawingPlayer = drawingPlayer;
+        this.count = count;
+        this.isDrawing = isDrawing;
     }
 }
 
+export class Player {
+    username: string;
+    score: number;
 
+    static userToPlayer(user: User): Player {
+        return { username: user.username, score: user.score }
+    }
+}
 
 export type Drawing = Stroke[]
-
 export type Stroke = [X, Y, T];
-
 type X = number[]
 type Y = number[]
 type T = number[]
