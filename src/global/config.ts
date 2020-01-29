@@ -1,3 +1,3 @@
 export default abstract class Config {
-    public static PORT = 9000;
+    public static readonly PORT = 9000;
 }

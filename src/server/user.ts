@@ -1,28 +1,21 @@
-import * as io from "socket.io";
-import Server from "./server";
+import * as io from 'socket.io';
 
-export default class User {
-    private socket: io.Socket;
-    private server: Server;
-    private username: string;
+export interface Client {
+    id: string
+}
 
-    constructor(socket: io.Socket, server: Server) {
-        this.socket = socket;
-        this.server = server;
+export interface User extends Client {
+    socket: io.Socket
+}
 
-        this.setupSocket();
-    }
+export function createUser(id: string, socket: io.Socket): User {
+    return { id, socket };
+}
 
-    private setupSocket(): void {
-        this.socket.on("disconnect", this.onDisconnect.bind(this));
-        this.socket.on("set_username", this.onSetUserName.bind(this));
-    }
+export interface Player extends Client {
+    username: string;
+}
 
-    private onDisconnect(): void {
-        this.server.userDisconnected(this);
-    }
-
-    private onSetUserName(username: string): void {
-        this.username = username;
-    }
+export function createPlayer(id: string): Player {
+    return { id, username: "anonymous" }
 }
