@@ -4,13 +4,15 @@ export default class GameState {
     players: Player[];
     drawingPlayer: Player;
     drawing: Drawing;
-    wordToDraw: string
+    wordToDraw: string;
+    count: number;
 
     constructor(player: Player) {
         this.players = [player];
         this.drawingPlayer = player;
         this.drawing = [];
         this.wordToDraw = "test";
+        this.count = 0;
     }
 
     static updateGameState(gameState: GameState): GameState {
@@ -32,12 +34,19 @@ export default class GameState {
 
         return { ...gameState, players: newPlayers };
     }
+
+    static updateDrawing(gameState: GameState, id: string, drawing: Drawing): GameState {
+        if (gameState.drawingPlayer.id === id) {
+            return { ...gameState, drawing};
+        }
+    }
 }
 
 
-type Drawing = Stroke[]
 
-type Stroke = [X, Y, T];
+export type Drawing = Stroke[]
+
+export type Stroke = [X, Y, T];
 
 type X = number[]
 type Y = number[]

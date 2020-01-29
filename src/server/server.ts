@@ -4,7 +4,7 @@ import * as http from 'http';
 import Config from "../global/config";
 import Event from "../global/event";
 import { User, createUser, createPlayer, Player, Client } from './user';
-import GameState from '../global/gamestate';
+import GameState, { Drawing } from '../global/gamestate';
 
 export default class Server {
     games: GameState[];
@@ -43,15 +43,14 @@ export default class Server {
                 this.games = Server.setUsername(this.games, id, username);
             })
 
-            socket.on("draw", (data) => {
-                const game = Server.getGameOfClient(this.games, id);
-
-                game.drawing = data;
-            })
+            socket.on(Event.DRAW, (drawing: Drawing) => {
+                this.games = Server.updateDrawing(this.games, id, drawing);
+            });
 
             
         setInterval(() => {
                 this.games = Server.updateGames(this.games);
+                this.games = Server.removeEmptyGames(this.games);
                 Server.notifyPlayers(this.games, this.users);
             }, 20);
         });
@@ -59,6 +58,13 @@ export default class Server {
 
     static userDisconnected(users: User[], id:string): User[] {
         return users.filter(user => user.id !== id)
+    }
+
+    static updateDrawing(games: GameState[], id: string, drawing: Drawing) {
+        const game = this.getGameOfClient(games, id);
+        const newGame = GameState.updateDrawing(game, id, drawing);
+        const otherGames = games.filter((g) => game !== g)
+        return [...otherGames, newGame];
     }
 
     static playerDisconnected(games: GameState[], id: string): GameState[] {
@@ -73,9 +79,12 @@ export default class Server {
             game.players.forEach((player) => {
                 this.notifyUpdate(game, player.id, users)
             })
-            
         })
     } 
+
+    static removeEmptyGames(games: GameState[]): GameState[] {
+        return games.filter(game => game.players.length > 0);
+    }
 
     static notifyUpdate(gameState: GameState, id: string, users: User[]): void {
         const user = users.filter((user) => user.id === id)[0];
