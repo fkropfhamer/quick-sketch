@@ -1,4 +1,4 @@
-import { Client } from "./user";
+import Client from "./client";
 
 export default class Game {
     clients: Client[];
@@ -27,6 +27,6 @@ export default class Game {
     }
 
     loop() {
-        console.log('loop')
+        console.log('loop');
     }
 }

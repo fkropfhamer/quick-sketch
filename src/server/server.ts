@@ -3,7 +3,7 @@ import * as express from 'express';
 import * as http from 'http';
 import Config from "../global/config";
 import { Event } from "../global/event";
-import { Client } from './user';
+import Client from './client';
 import GameState, { Drawing } from '../global/gamestate';
 import Game from './game';
 

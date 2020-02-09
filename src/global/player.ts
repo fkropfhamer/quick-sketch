@@ -1,6 +1,6 @@
-import * as io from 'socket.io';
+import Client from "../server/client";
 
-export class Player {
+export default class Player {
     username: string;
     id: string;
     score: number;
@@ -13,14 +13,5 @@ export class Player {
 
     static playerFromClient(client: Client): Player {
         return { username: client.username, id: client.id, score: client.score }
-    }
-}
-
-export class Client extends Player {
-    socket: io.Socket;
-
-    constructor(id: string, socket: io.Socket) {
-        super(id);
-        this.socket = socket;
     }
 }
