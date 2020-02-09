@@ -13,7 +13,7 @@ fs.readdirSync('node_modules')
 
 module.exports = [
   {
-    entry: './src/client/js/main.ts',
+    entry: './src/client/js/main.tsx',
     module: {
       rules: [
         {

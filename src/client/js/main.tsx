@@ -1,4 +1,4 @@
-import * as io from 'socket.io-client';
+/* import * as io from 'socket.io-client';
 import { Event } from '../../global/event';
 import GameState, { Drawing, Stroke } from '../../global/gamestate';
 
@@ -83,4 +83,13 @@ function main(): void {
     })
 }
 
-main();
+main(); */
+
+import * as React from "react";
+import * as ReactDOM from "react-dom";
+import App from "./components/App";
+
+const root = document.getElementById("root");
+if (root) {
+    ReactDOM.render(<App />, root);
+}
