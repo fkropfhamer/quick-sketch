@@ -36,15 +36,18 @@ export default class Server {
             socket.on(Event.DISCONNECT, () => {
                 console.log(`user with id ${id} disconnected`);
                 this.clients = this.clients.filter((c) => !Object.is(c, client));
+                this.game.removeClient(client);
             });
 
             socket.on(Event.SET_USERNAME, (username: string) => {
                 if ( username !== "") {
                     client.username = username;
+                    console.log(`user with id ${id} changed name to ${username}`)
                 }
             });
 
             socket.on(Event.READY, () => {
+                console.log(`user with id ${id} is ready`)
                 this.game.addClient(client);
             })
 
