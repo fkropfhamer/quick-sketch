@@ -2,22 +2,22 @@ import * as io from 'socket.io';
 import * as express from 'express';
 import * as http from 'http';
 import Config from "../global/config";
-import Event from "../global/event";
-import User from './user';
+import { Event } from "../global/event";
+import { Client } from './user';
 import GameState, { Drawing } from '../global/gamestate';
 import Game from './game';
 
 export default class Server {
-    games: Game[];
-    users: User[];
+    game: Game;
+    clients: Client[];
 
     constructor() {
         const app = express();
         const webServer = http.createServer(app);
         const webSocket = io(webServer);
 
-        this.games = [];
-        this.users = [];
+        this.game = new Game();
+        this.clients = [];
 
         app.use(express.static("public"));
 
@@ -27,37 +27,30 @@ export default class Server {
 
         webSocket.on(Event.CONNECTION, (socket: io.Socket) => {
             const id = socket.id;
-            const user = new User(id, socket);
-            const game = this.findGame(user);
+            const client = new Client(id, socket);
+
             console.log(`user with id ${id} connected`);
 
-            this.users.push(user);
+            this.clients.push(client);
 
             socket.on(Event.DISCONNECT, () => {
                 console.log(`user with id ${id} disconnected`);
-                game.removeUser(user);
-                this.games = this.games.filter(game => game.players.length > 0)
+                this.clients = this.clients.filter((c) => !Object.is(c, client));
             });
 
             socket.on(Event.SET_USERNAME, (username: string) => {
-                user.username = username;
+                if ( username !== "") {
+                    client.username = username;
+                }
             });
+
+            socket.on(Event.READY, () => {
+                this.game.addClient(client);
+            })
 
             socket.on(Event.DRAW, (drawing: Drawing) => {
-                game.draw(id, drawing);
+                console.log("draw-event")
             });
         });
-    }
-
-    findGame(user: User): Game {
-        const openGames = this.games.filter(game => game.players.length < Config.MAX_PLAYER_NUMBER)
-        if (openGames.length <= 0) {
-            const newGame = new Game(user);
-            this.games.push(newGame);
-            return newGame;
-        }
-        const game = openGames.sort((a, b) => a.players.length - b.players.length)[0];
-        game.players.push(user);
-        return game;
     }
 }

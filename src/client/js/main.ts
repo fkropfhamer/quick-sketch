@@ -1,5 +1,5 @@
 import * as io from 'socket.io-client';
-import Event from '../../global/event';
+import { Event } from '../../global/event';
 import GameState, { Drawing, Stroke } from '../../global/gamestate';
 
 const socket = io();
