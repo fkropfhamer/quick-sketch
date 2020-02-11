@@ -7,4 +7,6 @@ export enum  Event {
     DRAW = 'draw',
     DRAWING = 'drawing',
     READY = 'ready',
+    START = 'start',
+    PLAYERS = 'players',
 }

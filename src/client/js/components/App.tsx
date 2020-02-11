@@ -1,16 +1,18 @@
 import * as io from "socket.io-client";
 import * as React from "react";
 import GameState from "../../../global/gamestate";
-import GameStateRenderer from "./GamestateRenderer";
+import Game from "./Game";
 import Username from "./Username";
 import Config from "../../../global/config";
 import { Event } from "../../../global/event";
+import Player from "../../../global/player";
 
 interface State {
     isConnected: boolean;
     isPlaying: boolean;
     gameState: GameState;
     username: string;
+    players: Player[];
 }
 
 export default class App extends React.Component {
@@ -25,6 +27,7 @@ export default class App extends React.Component {
             isPlaying: false,
             gameState: null,
             username: "",
+            players: [],
         }
     }
 
@@ -42,7 +45,8 @@ export default class App extends React.Component {
     }
 
     setupSocket() {
-        console.log("dfasf");
+        this.socket.on(Event.START, () => this.setState({isPlaying: true}));
+        this.socket.on(Event.PLAYERS, (players: Player[]) => {this.setState({players}); console.log(players)})
     }
 
     render() {
@@ -50,7 +54,7 @@ export default class App extends React.Component {
             <div>
                 <h1>{this.state.isConnected ? "connected" : "disconnected"}</h1>
                 <h1>Username: {this.state.username}</h1>
-                {this.state.isPlaying ? <GameStateRenderer /> : <Username username={this.state.username} setUsername={this.setUsername.bind(this)}/>}
+                {this.state.isPlaying ? <Game players={this.state.players}/> : <Username username={this.state.username} setUsername={this.setUsername.bind(this)}/>}
             </div>
             )
     }

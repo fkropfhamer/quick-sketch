@@ -18,15 +18,19 @@ export default class Game {
         if (this.clients.length > 0 && !this.isStarted) {
             this.start();
         }
+        client.notifyStart();
+        this.clients.forEach((c) => c.notifyClients(this.clients));
     }
 
     removeClient(client: Client) {
         this.clients = this.clients.filter((c) => !Object.is(c, client));
+        this.clients.forEach((c) => c.notifyClients(this.clients));
         if (this.clients.length === 0) {
             clearInterval(this.interval);
             this.isStarted = false;
         } else if (Object.is(client, this.drawingClient)) {
             this.changeDrawingPlayer();
+            
         }
     }
 
