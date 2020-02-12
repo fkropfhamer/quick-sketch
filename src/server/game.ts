@@ -1,5 +1,6 @@
 import Client from "./client";
 import Config from "../global/config";
+import { DrawEvent, Drawing } from "../global/gamestate";
 
 export default class Game {
     clients: Client[];
@@ -7,10 +8,12 @@ export default class Game {
     timer: number;
     isStarted: boolean;
     drawingClient: Client;
+    drawing: Drawing;
 
     constructor() {
         this.clients = [];
         this.isStarted = false;
+        this.drawing = [];
     }
 
     addClient(client: Client) {
@@ -47,6 +50,16 @@ export default class Game {
             this.changeDrawingPlayer();
         }
         console.log(`loop ${this.timer}`);
+    }
+
+    addDrawEvent(drawEvent: DrawEvent) {
+        if(!drawEvent.mouseWasPressed) {
+            this.drawing.push([[], [], []]);
+        }
+        const lastStroke = this.drawing[this.drawing.length - 1];
+        lastStroke[0].push(drawEvent.x);
+        lastStroke[1].push(drawEvent.y);
+        this.clients.forEach((client) => client.notifyDrawing(this.drawing))
     }
 
     changeDrawingPlayer() {

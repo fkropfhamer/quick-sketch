@@ -54,7 +54,7 @@ export default class App extends React.Component {
             <div>
                 <h1>{this.state.isConnected ? "connected" : "disconnected"}</h1>
                 <h1>Username: {this.state.username}</h1>
-                {this.state.isPlaying ? <Game players={this.state.players}/> : <Username username={this.state.username} setUsername={this.setUsername.bind(this)}/>}
+                {this.state.isPlaying ? <Game socket={this.socket}players={this.state.players}/> : <Username username={this.state.username} setUsername={this.setUsername.bind(this)}/>}
             </div>
             )
     }

@@ -1,8 +1,11 @@
 import * as React from "react";
 import Player from "../../../global/player";
+import PlayerList from "./PlayerList";
+import Canvas from "./Canvas";
 
 interface Props {
     players: Player[]
+    socket: SocketIOClient.Socket;
 }
 
 export default function Game(props: Props) {
@@ -10,14 +13,8 @@ export default function Game(props: Props) {
         <div>
             <h1>GameState</h1>
             <PlayerList players={props.players}/>
+            <Canvas socket={props.socket}/>
         </div>
     )
 }
 
-function PlayerList(props: Props) {
-    return (
-        <div>
-            {props.players.map((player) => <h1 key={player.id}>{player.username} {player.score}</h1>)}
-        </div>
-    )
-} 

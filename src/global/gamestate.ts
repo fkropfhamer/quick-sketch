@@ -19,6 +19,8 @@ export default class GameState {
     }
 }
 
+export type DrawEvent = { x: number, y: number, mouseWasPressed: boolean }
+
 
 export type Drawing = Stroke[]
 export type Stroke = [X, Y, T];

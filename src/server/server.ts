@@ -4,7 +4,7 @@ import * as http from 'http';
 import Config from "../global/config";
 import { Event } from "../global/event";
 import Client from './client';
-import GameState, { Drawing } from '../global/gamestate';
+import GameState, { Drawing, DrawEvent } from '../global/gamestate';
 import Game from './game';
 
 export default class Server {
@@ -51,8 +51,9 @@ export default class Server {
                 this.game.addClient(client);
             })
 
-            socket.on(Event.DRAW, (drawing: Drawing) => {
-                console.log("draw-event")
+            socket.on(Event.DRAW, (drawEvent: DrawEvent) => {
+                console.log("draw-event", drawEvent)
+                this.game.addDrawEvent(drawEvent)
             });
         });
     }
